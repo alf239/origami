@@ -32,4 +32,14 @@ object Origami32 {
 
   def concatL[A](xs: List[List[A]]): List[A] =
     foldL[List[A], List[A]](appendL)(Nil, xs)
+
+  def isort[A: Ordering](as: List[A]): List[A] = {
+    def insert(y: A, ys: List[A])(implicit ord: Ordering[A]): List[A] = ys match {
+      case Nil => wrap(y)
+      case Cons(x, xs) if ord.lt(y, x) => Cons(y, Cons(x, xs))
+      case Cons(x, xs) => Cons(x, insert(y, xs))
+    }
+
+    foldL(insert)(Nil, as)
+  }
 }
