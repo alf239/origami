@@ -24,6 +24,11 @@ object Origami32 {
     case Cons(x, xs) => f(x, foldL(f)(e, xs))
   }
 
+  def paraL[A, B](f: (A, (List[A], B)) => B)(e: B, as: List[A]): B = as match {
+    case Nil => e
+    case Cons(x, xs) => f(x, (xs, paraL(f)(e, xs)))
+  }
+
   def mapL[A, B](f: A => B)(as: List[A]): List[B] =
     foldL[A, List[B]]((a, bs) => Cons(f(a), bs))(Nil, as)
 
@@ -35,13 +40,12 @@ object Origami32 {
 
   def isort[A: Ordering](as: List[A]): List[A] = {
     def insert1(y: A, ys: List[A])(implicit ord: Ordering[A]): List[A] =
-      foldL[A, (List[A], List[A])] { (x, pair) =>
+      paraL[A, List[A]] { (x, pair) =>
         val (xs, yxs) = pair
         val Cons(y, _) = yxs
-        val xs1 = Cons(x, xs)
-        if (ord.lt(y, x)) (xs1, Cons(y, xs1))
-        else (xs1, Cons(x, yxs))
-      }((Nil, wrap(y)), ys)._2
+        if (ord.lt(y, x)) Cons(y, Cons(x, xs))
+        else Cons(x, yxs)
+      }(wrap(y), ys)
 
     foldL(insert1)(Nil, as)
   }

@@ -30,7 +30,10 @@ class Origami32Test extends FlatSpec with Checkers {
   }
 
   "isort" should "sort" in {
-    check((n: List[Int]) => sorted(isort(n)))
+    check {
+      xs: List[Int] =>
+        sorted(isort(xs))
+    }
   }
 
   @tailrec
@@ -41,11 +44,6 @@ class Origami32Test extends FlatSpec with Checkers {
 
 
   implicit def arbitraryList[A: Arbitrary]: Arbitrary[List[A]] = Arbitrary {
-    Gen.oneOf(
-      Gen.const(Nil),
-      for {
-        head <- arbitrary[A]
-        tail <- arbitraryList.arbitrary
-      } yield Cons(head, tail))
+    Gen.listOf[A](arbitrary[A]).map(_.foldRight[List[A]](Nil)(Cons.apply))
   }
 }
