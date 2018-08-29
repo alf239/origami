@@ -1,6 +1,6 @@
 package uk.kamchatka.origami
 
-object Origami32 {
+object ListOrigami {
 
   sealed trait List[+A]
 
@@ -27,6 +27,18 @@ object Origami32 {
   def paraL[A, B](f: (A, (List[A], B)) => B)(e: B, as: List[A]): B = as match {
     case Nil => e
     case Cons(x, xs) => f(x, (xs, paraL(f)(e, xs)))
+  }
+
+  // or we can say p = f(_).isEmpty, g = f(_).get._1, b = u and use unfoldL
+  def unfoldL1[A, B](f: B => Option[(A, B)])(u: B): List[A] =
+    f(u).fold[List[A]](Nil) { case (x, v) => Cons(x, unfoldL1(f)(v)) }
+
+  // or we can say f = b => if (p(b)) None else Some((f(b), g(b))), u = b and use unfoldL1
+  def unfoldL[A, B](p: B => Boolean)(f: B => A, g: B => B, b: B): List[A] = {
+    def basicUnfold[C](p: C => Boolean)(g: C => C, c: C): List[C] =
+      if (p(c)) Nil else Cons(c, basicUnfold(p)(g, g(c))) // we can go further in a lazy language, but Scala isn't one
+
+    mapL(f)(basicUnfold(p)(g, b))
   }
 
   def mapL[A, B](f: A => B)(as: List[A]): List[B] =

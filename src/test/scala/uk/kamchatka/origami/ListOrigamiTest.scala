@@ -6,11 +6,11 @@ import org.scalacheck.Gen
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Prop._
 import org.scalatest.FlatSpec
-import uk.kamchatka.origami.Origami32._
+import uk.kamchatka.origami.ListOrigami._
 
 import scala.annotation.tailrec
 
-class Origami32Test extends FlatSpec with Checkers {
+class ListOrigamiTest extends FlatSpec with Checkers {
   "foldL" should "calculate" in {
     assert(foldL[Double, Double](_ + _)(0.0, list(1.0, 2.0, 3.0)) == 6.0)
   }
